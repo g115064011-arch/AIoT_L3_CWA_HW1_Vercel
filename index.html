@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台灣天氣預報 🌤️ CWA 36小時天氣預報</title>
+  <meta name="description" content="中央氣象署 CWA 36小時台灣各縣市天氣預報儀表板，提供即時氣溫、降雨機率、舒適度與出門小提醒。">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1 class="header-title"><span class="header-icon">🌤️</span> 台灣天氣預報</h1>
+        <p class="hero-subtitle">CWA 36 小時預報｜快速決定今天要不要帶傘、外套與防曬用品</p>
+      </div>
+      <div class="header-right">
+        <button id="refresh-btn" class="btn-refresh" aria-label="更新資料">
+          <span class="refresh-icon">🔄</span> 更新資料
+        </button>
+        <span id="last-updated" class="last-updated-badge">載入中...</span>
+      </div>
+    </header>
+
+    <!-- Loading & Error Overlays -->
+    <div id="status-banner" class="status-banner hidden"></div>
+
+    <!-- Controls Card (Region & Forecast Period Selector) -->
+    <section class="controls-card">
+      <div class="control-group location-group">
+        <label for="location-select" class="control-label">📍 選擇縣市</label>
+        <div class="select-wrapper">
+          <select id="location-select" class="form-select">
+            <option value="" disabled selected>載入縣市清單中...</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="control-group period-group">
+        <label class="control-label">⏰ 選擇預報時段</label>
+        <div id="period-tabs" class="period-tabs" role="tablist">
+          <!-- Dynamic period buttons will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Map & Current Region Details -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Taiwan Weather Map -->
+      <section class="card map-card">
+        <div class="card-header">
+          <h2 class="card-title">🗺️ 全台天氣地圖</h2>
+          <p class="card-caption">
+            點擊標記切換縣市。顏色依最高溫：
+            <span class="legend-item"><span class="legend-dot temp-cold"></span>&lt;20°C</span>
+            <span class="legend-item"><span class="legend-dot temp-mild"></span>20–28°C</span>
+            <span class="legend-item"><span class="legend-dot temp-warm"></span>28–33°C</span>
+            <span class="legend-item"><span class="legend-dot temp-hot"></span>≥33°C</span>
+          </p>
+        </div>
+        <div id="map" class="leaflet-map-container" role="region" aria-label="全台灣即時氣候地圖"></div>
+        <div class="map-footer">
+          <span id="marker-status-text">目前顯示 22 個縣市標記</span>
+        </div>
+      </section>
+
+      <!-- Right Column: Regional Weather Information -->
+      <section class="info-column">
+        <!-- Region Overview Card -->
+        <div class="card region-overview-card">
+          <div class="region-title-wrap">
+            <h2 id="current-location-name" class="region-name">📍 臺北市</h2>
+            <div id="current-weather-badge" class="weather-pill-large">
+              <span id="current-weather-icon">🌤️</span>
+              <span id="current-weather-text">晴時多雲</span>
+            </div>
+          </div>
+
+          <!-- 3 Key Metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">🌡️ 溫度</div>
+              <div id="metric-temp" class="metric-value">--–--°C</div>
+              <div id="metric-temp-sub" class="metric-sub">最低 ~ 最高溫</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">☔ 降雨機率</div>
+              <div id="metric-pop" class="metric-value">--%</div>
+              <div id="metric-pop-pill" class="rain-pill-badge">☔ --%</div>
+            </div>
+            <div class="metric-card metric-card-wide">
+              <div class="metric-label">🙂 舒適度</div>
+              <div id="metric-ci" class="metric-value metric-ci-text">--</div>
+            </div>
+          </div>
+
+          <!-- Outing Tips Card -->
+          <div class="tip-card">
+            <div class="tip-title">💡 出門小提醒</div>
+            <div id="tips-container" class="tips-container">
+              <div class="tip-line">載入出門建議中...</div>
+            </div>
+          </div>
+
+          <!-- Period Details & Attribution -->
+          <div class="soft-note">
+            <div>預報時段：<strong id="active-period-label">載入中...</strong></div>
+            <div class="source-credit">資料來源：中央氣象署 CWA Open Data (F-C0032-001)</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 36-Hour Forecast 3 Cards Section -->
+    <section class="forecast-section">
+      <div class="section-header">
+        <h2 id="forecast-cards-title" class="section-title">🗓️ 36 小時預報</h2>
+      </div>
+      <div id="three-period-cards" class="three-period-grid">
+        <!-- 3 cards generated dynamically -->
+      </div>
+    </section>
+
+    <!-- Detailed Forecast Table Section -->
+    <section class="table-section">
+      <div class="section-header">
+        <h2 class="section-title">📋 查看詳細預報資料</h2>
+      </div>
+      <div class="card forecast-table-wrap">
+        <div class="table-responsive">
+          <table class="forecast-table">
+            <thead>
+              <tr>
+                <th scope="col">預報時段</th>
+                <th scope="col">天氣狀態</th>
+                <th scope="col">氣溫區間</th>
+                <th scope="col">降雨機率</th>
+                <th scope="col">體感舒適度</th>
+              </tr>
+            </thead>
+            <tbody id="forecast-table-body">
+              <tr>
+                <td colspan="5" class="table-loading">正在載入資料...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p id="total-records-count">資料庫共有 0 筆預報紀錄</p>
+      <p class="footer-sub">AIoT CWA Weather Web App｜Powered by FastAPI & Leaflet</p>
+    </footer>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Application JS -->
+  <script src="app.js"></script>
+</body>
+</html>

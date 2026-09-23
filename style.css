@@ -1,0 +1,811 @@
+/* ==========================================================================
+   Taiwan Weather Forecast Web App - Stylesheet
+   Modern, Clean, Streamlit-inspired Dashboard
+   ========================================================================== */
+
+:root {
+  /* Color Palette */
+  --bg-app: #F4F9FD;
+  --card-bg: #FFFFFF;
+  --card-border: #E3EDF5;
+  --card-border-hover: #CDE1F0;
+  --card-shadow: 0 6px 18px rgba(34, 82, 120, 0.06);
+  --card-shadow-hover: 0 10px 24px rgba(34, 82, 120, 0.1);
+
+  --title-navy: #174A7E;
+  --title-deep: #173F63;
+  --text-main: #2E4F68;
+  --text-muted: #66839A;
+  --text-light: #8DA7BD;
+
+  /* Accents & Status Colors */
+  --primary-blue: #2376BE;
+  --primary-hover: #1A5FA0;
+  --pill-weather-bg: #EFF7FC;
+  --pill-weather-text: #285C7D;
+  --pill-weather-border: #DCEAF4;
+  --pill-rain-bg: #EDF8F3;
+  --pill-rain-text: #28745B;
+  --pill-rain-border: #C8E8DA;
+  --soft-note-bg: #EAF5FD;
+  --soft-note-border: #D5EAF8;
+  --soft-note-text: #315D7A;
+
+  /* Temperature scale */
+  --temp-cold: #2B7CD3;
+  --temp-mild: #27AE60;
+  --temp-warm: #F39C12;
+  --temp-hot: #E74C3C;
+
+  /* Typography */
+  --font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --radius-input: 12px;
+  --transition-smooth: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Base & Reset ────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 3rem;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.header-title {
+  color: var(--title-navy);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-icon {
+  font-size: 2.1rem;
+}
+
+.hero-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.btn-refresh {
+  background: #FFFFFF;
+  color: var(--title-navy);
+  border: 1.5px solid var(--card-border);
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-input);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 2px 6px rgba(34, 82, 120, 0.04);
+  transition: var(--transition-smooth);
+}
+
+.btn-refresh:hover {
+  background: #F0F6FB;
+  border-color: #BCD3E6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(34, 82, 120, 0.08);
+}
+
+.btn-refresh:active {
+  transform: translateY(0);
+}
+
+.btn-refresh.loading .refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.last-updated-badge {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: #EAF4FB;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+
+/* ── Status Banner (Error & Notifications) ─────────────────────────────────── */
+.status-banner {
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius-input);
+  margin-bottom: 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.3s ease;
+}
+
+.status-banner.error {
+  background-color: #FDF2F2;
+  border: 1px solid #F8B4B4;
+  color: #C81E1E;
+}
+
+.status-banner.info {
+  background-color: #EDF5FD;
+  border: 1px solid #C8E1F8;
+  color: #1A5FA0;
+}
+
+.status-banner.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Common Card Styling ─────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  padding: 1.25rem 1.4rem;
+  transition: var(--transition-smooth);
+}
+
+/* ── Controls Section ─────────────────────────────────────────────────────── */
+.controls-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.location-group {
+  min-width: 200px;
+}
+
+.period-group {
+  flex: 1;
+}
+
+.control-label {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.form-select {
+  width: 100%;
+  appearance: none;
+  background: #FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2357748E' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E") no-repeat right 14px center;
+  border: 1.5px solid #D9E8F3;
+  color: var(--title-deep);
+  padding: 0.65rem 2.2rem 0.65rem 1rem;
+  border-radius: var(--radius-input);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.form-select:hover {
+  border-color: #B4D4ED;
+}
+
+.form-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 118, 190, 0.12);
+}
+
+/* Period Pills / Tabs */
+.period-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.period-btn {
+  background: #F2F8FD;
+  border: 1px solid #D9E8F3;
+  color: #3B5F7D;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-input);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition-smooth);
+}
+
+.period-btn:hover {
+  background: #E5F1FA;
+  border-color: #C0DCF0;
+  color: var(--title-navy);
+}
+
+.period-btn.active {
+  background: #174A7E;
+  border-color: #174A7E;
+  color: #FFFFFF;
+  box-shadow: 0 3px 8px rgba(23, 74, 126, 0.25);
+}
+
+.period-time-sub {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+/* ── Main Dashboard Grid ─────────────────────────────────────────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Map Card */
+.map-card {
+  display: flex;
+  flex-direction: column;
+  height: 570px;
+}
+
+.card-header {
+  margin-bottom: 0.75rem;
+}
+
+.card-title {
+  color: var(--title-navy);
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.card-caption {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.temp-cold { background-color: var(--temp-cold); }
+.legend-dot.temp-mild { background-color: var(--temp-mild); }
+.legend-dot.temp-warm { background-color: var(--temp-warm); }
+.legend-dot.temp-hot { background-color: var(--temp-hot); }
+
+.leaflet-map-container {
+  flex: 1;
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #DCEAF4;
+  z-index: 1;
+}
+
+.map-footer {
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* Right Column (Region Overview) */
+.info-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.region-overview-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.region-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #EEF5FA;
+}
+
+.region-name {
+  color: var(--title-navy);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.weather-pill-large {
+  background: var(--pill-weather-bg);
+  border: 1px solid var(--pill-weather-border);
+  color: var(--pill-weather-text);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.metric-card {
+  background: #F9FCFE;
+  border: 1px solid #E3EDF5;
+  border-radius: 14px;
+  padding: 0.9rem 1.1rem;
+  box-shadow: 0 2px 6px rgba(34, 82, 120, 0.03);
+}
+
+.metric-card-wide {
+  grid-column: 1 / -1;
+}
+
+.metric-label {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.metric-value {
+  color: var(--title-deep);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.metric-sub {
+  color: var(--text-light);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+.rain-pill-badge {
+  display: inline-block;
+  background: var(--pill-rain-bg);
+  border: 1px solid var(--pill-rain-border);
+  color: var(--pill-rain-text);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.metric-ci-text {
+  font-size: 1.25rem;
+  color: #276288;
+}
+
+/* Tips Card */
+.tip-card {
+  background: #FFFFFF;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 0.95rem 1.1rem;
+  box-shadow: 0 4px 12px rgba(34, 82, 120, 0.04);
+  margin-bottom: 0.85rem;
+  flex: 1;
+}
+
+.tip-title {
+  color: var(--title-navy);
+  font-weight: 800;
+  font-size: 0.98rem;
+  margin-bottom: 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tips-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tip-line {
+  color: #355874;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Soft Note */
+.soft-note {
+  background: var(--soft-note-bg);
+  border: 1px solid var(--soft-note-border);
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  color: var(--soft-note-text);
+  font-size: 0.84rem;
+}
+
+.source-credit {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+/* ── 3-Period Forecast Cards ─────────────────────────────────────────────── */
+.forecast-section {
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  color: var(--title-navy);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.three-period-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
+}
+
+.forecast-period-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 1.15rem 1.25rem;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  transition: var(--transition-smooth);
+}
+
+.forecast-period-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--card-border-hover);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.forecast-period-card.is-active {
+  border-color: #8CC4ED;
+  background: #FBFDFF;
+}
+
+.fpc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.fpc-title {
+  color: var(--title-navy);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.fpc-time {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.fpc-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fpc-temp-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.fpc-icon {
+  font-size: 1.7rem;
+}
+
+.fpc-temp {
+  color: var(--title-deep);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.fpc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.4rem;
+  border-top: 1px solid #EEF5FA;
+}
+
+.fpc-desc {
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.pill-rain {
+  display: inline-block;
+  background: var(--pill-rain-bg);
+  color: var(--pill-rain-text);
+  border: 1px solid var(--pill-rain-border);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pill-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--pill-weather-bg);
+  color: var(--pill-weather-text);
+  border: 1px solid var(--pill-weather-border);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+/* ── Detailed Forecast Table ─────────────────────────────────────────────── */
+.table-section {
+  margin-bottom: 2rem;
+}
+
+.forecast-table-wrap {
+  padding: 0;
+  overflow: hidden;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.forecast-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+.forecast-table th {
+  background: #EAF4FB;
+  color: #315D7A;
+  padding: 0.85rem 1.15rem;
+  font-weight: 750;
+  border-bottom: 1px solid #DCEAF4;
+  white-space: nowrap;
+}
+
+.forecast-table td {
+  padding: 0.9rem 1.15rem;
+  color: var(--text-main);
+  border-bottom: 1px solid #EEF4F8;
+  vertical-align: middle;
+}
+
+.forecast-table tr:last-child td {
+  border-bottom: none;
+}
+
+.forecast-table tr:hover td {
+  background: #F8FCFF;
+}
+
+.table-loading {
+  text-align: center;
+  padding: 2rem !important;
+  color: var(--text-muted);
+}
+
+/* ── Leaflet Custom Elements ─────────────────────────────────────────────── */
+.temp-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1F2D3D;
+  font-size: 11px;
+  font-weight: 800;
+  text-shadow: 0 0 3px #FFFFFF, 0 0 3px #FFFFFF;
+  pointer-events: none;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(34, 82, 120, 0.16);
+  border: 1px solid #E3EDF5;
+  padding: 2px;
+}
+
+.leaflet-popup-content {
+  font-family: var(--font-family);
+  margin: 12px 14px;
+  line-height: 1.55;
+  color: var(--text-main);
+  font-size: 0.88rem;
+}
+
+.popup-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--title-navy);
+  margin-bottom: 4px;
+}
+
+.popup-divider {
+  border: none;
+  height: 1px;
+  background: #E5EFF6;
+  margin: 6px 0;
+}
+
+.popup-btn-select {
+  display: inline-block;
+  margin-top: 8px;
+  background: #174A7E;
+  color: #FFFFFF;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.popup-btn-select:hover {
+  background: #1A5FA0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.app-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E3EDF5;
+  margin-top: 1.5rem;
+}
+
+.footer-sub {
+  font-size: 0.76rem;
+  color: var(--text-light);
+  margin-top: 0.25rem;
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-card {
+    height: 480px;
+  }
+
+  .three-period-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-container {
+    padding: 1rem 0.85rem 2rem;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-card {
+    height: 400px;
+  }
+}

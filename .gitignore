@@ -1,9 +1,10 @@
 .env
 __pycache__/
 *.pyc
+.vercel/
 .venv/
 venv/
 data/*.db
-
 *_backup*.py
 result_check.txt
+powershell.cmd
