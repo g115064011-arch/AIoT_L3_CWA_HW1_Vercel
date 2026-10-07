@@ -1,6 +1,9 @@
 # 台灣天氣預報 Web App
 
 # 🌤️ AIoT_L3_CWA_HW1
+<img width="1292" height="918" alt="image" src="https://github.com/user-attachments/assets/b4171f1f-c77e-4962-95fc-3fec202762f5" />
+
+
 
 ## 專案目的
 
